@@ -1,0 +1,50 @@
+version: '3.8'
+
+services:
+
+  # web Server Service
+  user_nginx:
+   image: nginx:alpine
+   container_name: user_nginx
+   ports:
+    - "8080:80"
+   volumes:
+    - ./:/var/www
+    - ./conf.d/:/etc/nginx/conf.d/
+   depends_on:
+    - user_app
+    - user_db
+   networks:
+    - registration
+  
+  # Application Service
+  user_app:
+   container_name: user_app
+   build:
+    context: .
+    dockerfile: Dockerfile
+   ports:
+    - "9000:9000"
+   working_dir: /var/www
+   volumes:
+    - ./:/var/www
+   networks:
+    - registration
+
+  # Database Service
+  user_db:
+   image: mysql
+   container_name: user_db
+   ports:
+    - "33064:3306"
+   volumes:
+    - ./data/db:/var/lib/mysql
+   environment:
+    - MYSQL_DATABASE=user
+    - MYSQL_ROOT_PASSWORD=password
+   networks:
+    - registration
+
+networks:
+  registration:
+   external: true

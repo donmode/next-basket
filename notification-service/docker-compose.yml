@@ -1,0 +1,50 @@
+version: '3.8'
+
+services:
+
+  # web Server Service
+  notification_nginx:
+   image: nginx:alpine
+   container_name: notification_nginx
+   ports:
+    - "8081:80"
+   volumes:
+    - ./:/var/www
+    - ./conf.d/:/etc/nginx/conf.d/
+   depends_on:
+    - notification_app
+    - notification_db
+   networks:
+    - registration
+  
+  # Application Service
+  notification_app:
+   container_name: notification_app
+   build:
+    context: .
+    dockerfile: Dockerfile
+   ports:
+    - "9001:9000"
+   working_dir: /var/www
+   volumes:
+    - ./:/var/www
+   networks:
+    - registration
+
+  # Database Service
+  notification_db:
+   image: mysql
+   container_name: notification_db
+   ports:
+    - "33065:3306"
+   volumes:
+    - ./data/db2:/var/lib/mysql
+   environment:
+    - MYSQL_DATABASE=notification
+    - MYSQL_ROOT_PASSWORD=password
+   networks:
+    - registration
+
+networks:
+  registration:
+   external: true
